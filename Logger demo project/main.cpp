@@ -23,7 +23,12 @@ int main() {
 
 	int counter = 0;
 
+	char x;
+
 	while (1) {
+
+		x = NULL;
+
 		counter++;
 		std::size_t ipPos = output.find("IPv4 Address. . . . . . . . . . . :");
 
@@ -39,9 +44,8 @@ int main() {
 
 		//system("PAUSE");
 
-		std::cout << "test" << std::endl;
+		std::cout << "test" << x << std::endl;
 
-		int x = 0;
 		std::cin >> x;
 	}
 
