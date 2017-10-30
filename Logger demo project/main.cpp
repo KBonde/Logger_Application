@@ -39,6 +39,8 @@ int main() {
 
 		//system("PAUSE");
 
+		std::cout << "test" << std::endl;
+
 		int x = 0;
 		std::cin >> x;
 	}
