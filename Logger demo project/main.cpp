@@ -5,7 +5,7 @@
 #include <fstream>
 
 std::string getOutPutFromCommand(std::string command);
-std::string findDataFromString(std::string stringToSearch, std::string dataField, uint8_t length, uint8_t offset);
+std::string findDataFromString(std::string stringToSearch, std::string dataField, int length, int offset);
 
 
 int main() {
@@ -37,7 +37,10 @@ int main() {
 		ip = findDataFromString(output, "IPv4 Address. . . . . . . . . . . :", ipLength, ipOffset);
 
 
-		system("PAUSE");
+		//system("PAUSE");
+
+		int x = 0;
+		std::cin >> x;
 	}
 
 	return 0;
@@ -51,16 +54,16 @@ std::string getOutPutFromCommand(std::string command) {
 	char buffer[max_buffer];
 	command.append(" 2>&1");
 
-	stream = _popen(command.c_str(), "r");
+	stream = popen(command.c_str(), "r");
 	if (stream) {
 		while (!feof(stream))
 			if (fgets(buffer, max_buffer, stream) != NULL) data.append(buffer);
-		_pclose(stream);
+		pclose(stream);
 	}
 	return data;
 }
 
-std::string findDataFromString(std::string stringToSearch, std::string dataField, uint8_t length, uint8_t offset) {
+std::string findDataFromString(std::string stringToSearch, std::string dataField, int length, int offset) {
 	std::string data;
 	std::size_t dataPos = stringToSearch.find(dataField);
 
