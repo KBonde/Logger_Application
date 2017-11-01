@@ -2,56 +2,65 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <fstream>
+#include <fstream>   //For file writing
+#include <unistd.h>  //For sleep function
+#include <ctime>     //For system time
 
 std::string getOutPutFromCommand(std::string command);
-std::string findDataFromString(std::string stringToSearch, std::string dataField, int length, int offset);
+std::string findDataFromString(std::string stringToSearch, std::string dataField, int offset);
 
 
 int main() {
 
-	int ipOffset = 57 + 11; //offset for data reading point
-	int ipLength = 5; //Lenght of the data
+	//Offset for data reading point
+	int dataOffset = 57; 
 
-	std::ofstream dataFile;
+	//Filestream
+	std::ofstream outputFile;
 
-	std::string output = getOutPutFromCommand("ip -s -d link show");
+	//Data values
+	std::string RXBytesVal;
 
-	std::string ip;
-
-	dataFile.open("dataFile.txt", std::ofstream::out | std::ofstream::app);
+	//Holds the output of entire command
+	std::string output; 
+	
 
 	int counter = 0;
 
-	char x;
+	while (1) { //Infinite loop so we can keep on picking up data
+		
+		//Get output from the command and store it
+		output = getOutPutFromCommand("ip -s -d link show"); 
+		
+		//Get system time right after command call
+		time_t t = time(0);
+		struct tm * now = localtime( & t );
 
-	while (1) {
+		//Find datafields and store data
+		RXBytesVal = findDataFromString(output, "RX: bytes", dataOffset);
 
-		x = NULL;
+		std::cout << RXBytesVal << std::endl; //Temp print
+
+		std::cout << "\n" << std::endl;
+
+		//We have to open and close the file every time we want to write to it. I dont know why ¯\_(ツ)_/¯
+		outputFile.open("outputFile.txt", std::ofstream::out | std::ofstream::app);
+		outputFile << (now->tm_mon + 1) << "-" << now->tm_mday  << "-"  << (now->tm_year + 1900); //Date printing
+		outputFile << ", " << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << " | "; //Time printing		
+
+		outputFile << "RX: " << RXBytesVal << " \n";
+		outputFile.close();
+
+		usleep(0.25/*seconds*/ * 1000000); //TODO: Probably remove this? So far just a delay to test the system.		
 
 		counter++;
-		std::size_t ipPos = output.find("RX: bytes");
-
-		if (ipPos != std::string::npos) {
-
-			for (int i = 0; i < ipLength; i++) {
-				ip += output[ipPos + ipOffset + i];
-			}
-		}
-
-		ip = findDataFromString(output, "RX: bytes", ipLength, ipOffset);
-
-		std::cout << ip << std::endl;
-
-		std::cout << "test" << std::endl;
-
-		std::cin >> x;
 	}
 
 	return 0;
 }
 
-std::string getOutPutFromCommand(std::string command) {
+//Runs the actual command, returns the whole output
+std::string getOutPutFromCommand(std::string command) { 
 
 	std::string data;
 	FILE * stream;
@@ -68,7 +77,8 @@ std::string getOutPutFromCommand(std::string command) {
 	return data;
 }
 
-std::string findDataFromString(std::string stringToSearch, std::string dataField, int length, int offset) {
+//Finds the specific data from the output based on an offset and returns the value in string format
+std::string findDataFromString(std::string stringToSearch, std::string dataField, int offset) {
 	std::string data;
 	std::size_t dataPos = stringToSearch.find(dataField);
 
@@ -76,14 +86,10 @@ std::string findDataFromString(std::string stringToSearch, std::string dataField
 
 		int i = 0;
 
-		for (int i = 0; i < 1000; i++) {
-			if(stringToSearch[dataPos + offset + i] != ' ') {
-				data += stringToSearch[dataPos + offset + i];
-			} else {
-				break;			
-			}
-		}
-		
+		while(stringToSearch[dataPos + offset + i] != ' ') {
+			data += stringToSearch[dataPos + offset + i];
+			i++;
+		}	
 	}
 
 	return data;
