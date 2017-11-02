@@ -20,12 +20,14 @@ int main() {
 
 	//Data values
 	std::string RXBytesVal;
+	std::string packetsVal;
+	std::string errorsVal;
+	std::string droppedVal;
+	std::string overrun;
+	std::string mcast;
 
 	//Holds the output of entire command
 	std::string output; 
-	
-
-	int counter = 0;
 
 	while (1) { //Infinite loop so we can keep on picking up data
 		
@@ -38,22 +40,26 @@ int main() {
 
 		//Find datafields and store data
 		RXBytesVal = findDataFromString(output, "RX: bytes", dataOffset);
-
-		std::cout << RXBytesVal << std::endl; //Temp print
-
-		std::cout << "\n" << std::endl;
+		packetsVal = findDataFromString(output, "packets", dataOffset);
+		errorsVal = findDataFromString(output, "errors", dataOffset);
+		droppedVal = findDataFromString(output, "dropped", dataOffset);
+		overrun = findDataFromString(output, "overrun", dataOffset);
+		mcast = findDataFromString(output, "mcast", dataOffset);
 
 		//We have to open and close the file every time we want to write to it. I dont know why ¯\_(ツ)_/¯
 		outputFile.open("outputFile.txt", std::ofstream::out | std::ofstream::app);
+		
+		//Printing to outputFile.txt
 		outputFile << (now->tm_mon + 1) << "-" << now->tm_mday  << "-"  << (now->tm_year + 1900); //Date printing
-		outputFile << ", " << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << " | "; //Time printing		
+		outputFile << ", " << now->tm_hour << ":" << now->tm_min << ":" << now->tm_sec << " \t";  //Time printing		
 
-		outputFile << "RX: " << RXBytesVal << " \n";
+		outputFile << "RX: \t" << RXBytesVal << " \t " << "Packets: \t" << packetsVal << " \t " << "Erros: \t" << errorsVal <<" \t "//Value printing
+ 			   << "dropped: \t" << droppedVal << " \t " << "overrun: \t" << overrun << " \t " << "Mcast: \t" << mcast << " \n"; //Value printing
+		
 		outputFile.close();
 
-		usleep(0.25/*seconds*/ * 1000000); //TODO: Probably remove this? So far just a delay to test the system.		
-
-		counter++;
+		//Sleep the task, so it does not run to fast
+		usleep(0.25/*seconds*/ * 1000000); //TODO: Make this suitable for the actual program		
 	}
 
 	return 0;
